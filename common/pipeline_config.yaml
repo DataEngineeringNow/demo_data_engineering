@@ -1,10 +1,12 @@
+# Main pipeline configuration
 oltp_db:
   host: "demo-ecommerce-demo-dataengineering.k.aivencloud.com"
   port: 17613
   database: "ecommerce"
-  user: "avnadmin"
-  password: "AVNS_1muvxS_KAQKH-PtVKOL"
+  # Credentials are loaded from a separate file for security
+  credentials: !include ../secrets/db_credentials.yaml
 
+# BigQuery configuration
 bigquery:
   project_id: "ngds-data-engineer"
   key_path: "secrets/ngds_bigquery_service_account.json"

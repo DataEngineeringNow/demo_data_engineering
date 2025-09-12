@@ -5,7 +5,8 @@ __pycache__/
 
 # Environment and secrets
 .venv/
-secrets/
+secrets/*
+!secrets/.gitkeep
 
 # IDE specific files
 .vscode/

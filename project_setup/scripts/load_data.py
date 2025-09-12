@@ -3,8 +3,12 @@ import sys
 import csv
 import psycopg2
 from psycopg2 import sql
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config.db_config import DB_CONFIG
+import yaml
+from pathlib import Path
+
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+from common.config import PIPELINE_CONFIG
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'data')
 
@@ -42,10 +46,22 @@ def load_csv_to_table(cursor, table_name, csv_path):
 
 
 def main():
-    db_config = DB_CONFIG.copy()
-    db_config["database"] = "ecommerce"
-    data_files = {f.replace('.csv', ''): os.path.join(DATA_DIR, f) for f in os.listdir(DATA_DIR) if f.endswith('.csv')}
-    with psycopg2.connect(**db_config) as conn:
+    # Get database configuration
+    db_config = PIPELINE_CONFIG['oltp_db'].copy()
+    db_config["database"] = "ecommerce"  # Ensure we're using the ecommerce database
+    
+    # Get list of CSV files to load
+    data_files = {f.replace('.csv', ''): os.path.join(DATA_DIR, f) 
+                 for f in os.listdir(DATA_DIR) if f.endswith('.csv')}
+    
+    # Connect to the database
+    with psycopg2.connect(
+        host=db_config['host'],
+        port=db_config['port'],
+        database=db_config['database'],
+        user=db_config['user'],
+        password=db_config['password']
+    ) as conn:
         with conn.cursor() as cur:
             for table_name in TABLE_LOAD_ORDER:
                 if table_name not in data_files:

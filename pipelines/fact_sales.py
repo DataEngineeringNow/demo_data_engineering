@@ -5,19 +5,13 @@ from common.bigquery_client import get_bq_client, load_to_bq
 from common.logging_utils import get_logger
 from common.dq_checks import run_dq_checks
 from common.config import PIPELINE_CONFIG
+from common.db_utils import get_sqlalchemy_engine
 import pandas as pd
-from sqlalchemy import create_engine
 
 
 def extract():
-    db_conf = PIPELINE_CONFIG['oltp_db']
-    user = db_conf['user']
-    password = db_conf['password']
-    host = db_conf['host']
-    port = db_conf['port']
-    database = db_conf['database']
-    engine_str = f"postgresql+psycopg2://{user}:{password}@{host}:{port}/{database}"
-    engine = create_engine(engine_str)
+    """Extract sales data from the OLTP database."""
+    engine = get_sqlalchemy_engine(PIPELINE_CONFIG['oltp_db'])
     query = '''
     SELECT oi.order_item_id AS sales_id, o.order_id, o.customer_id, oi.product_id, o.seller_id, o.order_date AS date_id,
            oi.quantity, (oi.quantity * oi.unit_price) AS gross_value, oi.discount, oi.tax,

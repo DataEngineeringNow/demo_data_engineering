@@ -9,7 +9,14 @@ import pandas as pd
 import psycopg2
 
 def extract():
-    conn = psycopg2.connect(**PIPELINE_CONFIG['oltp_db'])
+    db_conf = PIPELINE_CONFIG['oltp_db']
+    conn = psycopg2.connect(
+        host=db_conf['host'],
+        port=db_conf['port'],
+        database=db_conf['database'],
+        user=db_conf['user'],
+        password=db_conf['password']
+    )
     query = "SELECT customer_id, customer_name AS name, email, phone, location, acquisition_channel, signup_date AS created_at FROM customers"
     df = pd.read_sql(query, conn)
     conn.close()
