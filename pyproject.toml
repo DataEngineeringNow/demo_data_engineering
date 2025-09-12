@@ -1,0 +1,20 @@
+[project]
+name = "demo_project"
+version = "0.1.0"
+description = "A demo project connecting to PostgreSQL and BigQuery"
+authors = [
+    { name = "Your Name", email = "your.email@example.com" }
+]
+requires-python = ">=3.8"
+
+dependencies = [
+    "psycopg2",
+    "google-cloud-bigquery",
+    "google-auth",
+    "pandas",
+    "pandas_gbq",
+    "pyyaml"
+]
+
+[tool.uv]
+# Optional: uv-specific configuration can go here

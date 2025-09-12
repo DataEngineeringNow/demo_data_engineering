@@ -1,0 +1,4 @@
+cart_event_id,customer_id,product_id,event_time,event_type,quantity
+1,1,1001,2025-09-10 10:30:00,add,1
+2,2,1011,2025-09-11 11:00:00,add,2
+3,3,1004,2025-09-12 12:15:00,remove,1

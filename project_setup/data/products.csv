@@ -1,0 +1,16 @@
+product_id,product_name,category,subcategory,brand,unit_price,cost_price
+1001,Redmi Note 12,Electronics,Mobile Phones,Xiaomi,14999.00,12000.00
+1002,iPhone 16 Pro,Electronics,Mobile Phones,Apple,129999.00,110000.00
+1003,Samsung Galaxy S25 Ultra,Electronics,Mobile Phones,Samsung,119999.00,100000.00
+1004,boAt Airdopes 441,Electronics,Wireless Earbuds,boAt,2499.00,1500.00
+1005,Noise ColorFit Pro 5,Electronics,Smartwatches,Noise,4999.00,3200.00
+1006,Mi Power Bank 3i,Power & Accessories,Power Banks,Mi,1499.00,1000.00
+1007,Ambrane Wireless Charging Stand,Power & Accessories,Wireless Charging Stands,Ambrane,1999.00,1400.00
+1008,Portronics Konnect L Data Cable,Power & Accessories,Multifunctional Data Cables,Portronics,499.00,300.00
+1009,Seagate Backup Plus Slim,Computing & Storage,External Hard Drives,Seagate,4999.00,3500.00
+1010,HP Pocket Portable Printer,Computing & Storage,Printers,HP,8999.00,7000.00
+1011,Mamaearth Ubtan Face Wash,Beauty,Face Wash,Mamaearth,299.00,180.00
+1012,Beardo Beard Oil,Beauty,Beard Oil,Beardo,350.00,200.00
+1013,Nivea Men Dark Spot Reduction Cream,Beauty,Face Cream,Nivea,225.00,120.00
+1014,Lakme Sun Expert SPF 50,Beauty,Sunscreen,Lakme,350.00,200.00
+1015,Wow Skin Science Onion Hair Oil,Beauty,Hair Oil,Wow,599.00,350.00
