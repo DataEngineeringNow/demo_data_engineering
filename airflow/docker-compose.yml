@@ -1,0 +1,157 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+
+  redis:
+    image: redis:latest
+    expose:
+      - 6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 50
+    restart: always
+
+  airflow-webserver:
+    image: apache/airflow:2.5.0
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY=Bp3aXYFvLpcPK_-vXPDl6lRmt39oHiu-hKRIa4Raabc=
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=true
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - AIRFLOW__API__AUTH_BACKEND=airflow.api.auth.backend.basic_auth
+      - _PIP_ADDITIONAL_USER_SITES='true'
+      - PYTHONPATH=/opt/airflow/dags:/opt/airflow/pipelines:/opt/airflow/common:/opt/airflow
+    volumes:
+      - /Users/saivineel/Documents/github/demo_data_engineering/dags:/opt/airflow/dags
+      - /Users/saivineel/Documents/github/demo_data_engineering/pipelines:/opt/airflow/pipelines
+      - /Users/saivineel/Documents/github/demo_data_engineering/common:/opt/airflow/common
+      - /Users/saivineel/Documents/github/demo_data_engineering/secrets:/opt/airflow/secrets
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    ports:
+      - "8080:8080"
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    restart: always
+
+  airflow-scheduler:
+    image: apache/airflow:2.5.0
+    depends_on:
+      - airflow-webserver
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY=Bp3aXYFvLpcPK_-vXPDl6lRmt39oHiu-hKRIa4Raabc=
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - _PIP_ADDITIONAL_USER_SITES='true'
+      - PYTHONPATH=/opt/airflow/dags:/opt/airflow/pipelines:/opt/airflow/common:/opt/airflow
+    volumes:
+      - /Users/saivineel/Documents/github/demo_data_engineering/dags:/opt/airflow/dags
+      - /Users/saivineel/Documents/github/demo_data_engineering/pipelines:/opt/airflow/pipelines
+      - /Users/saivineel/Documents/github/demo_data_engineering/common:/opt/airflow/common
+      - /Users/saivineel/Documents/github/demo_data_engineering/secrets:/opt/airflow/secrets
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: scheduler
+    restart: always
+
+  airflow-worker:
+    image: apache/airflow:2.5.0
+    depends_on:
+      - airflow-scheduler
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - AIRFLOW__CORE__FERNET_KEY=Bp3aXYFvLpcPK_-vXPDl6lRmt39oHiu-hKRIa4Raabc=
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - _PIP_ADDITIONAL_USER_SITES='true'
+      - PYTHONPATH=/opt/airflow/dags:/opt/airflow/pipelines:/opt/airflow/common:/opt/airflow
+    volumes:
+      - /Users/saivineel/Documents/github/demo_data_engineering/dags:/opt/airflow/dags
+      - /Users/saivineel/Documents/github/demo_data_engineering/pipelines:/opt/airflow/pipelines
+      - /Users/saivineel/Documents/github/demo_data_engineering/common:/opt/airflow/common
+      - /Users/saivineel/Documents/github/demo_data_engineering/secrets:/opt/airflow/secrets
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: celery worker
+    restart: always
+
+  airflow-init:
+    image: apache/airflow:2.5.0
+    depends_on:
+      - postgres
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=false
+      - _AIRFLOW_DB_UPGRADE=true
+      - _AIRFLOW_WWW_USER_CREATE=true
+      - _AIRFLOW_WWW_USER_USERNAME=admin
+      - _AIRFLOW_WWW_USER_PASSWORD=admin
+      - _AIRFLOW_WWW_USER_FIRSTNAME=Admin
+      - _AIRFLOW_WWW_USER_LASTNAME=User
+      - _AIRFLOW_WWW_USER_EMAIL=admin@example.com
+      - _AIRFLOW_WWW_USER_ROLE=Admin
+      - PYTHONPATH=/opt/airflow/dags:/opt/airflow/pipelines:/opt/airflow/common:/opt/airflow
+    volumes:
+      - /Users/saivineel/Documents/github/demo_data_engineering/dags:/opt/airflow/dags
+      - /Users/saivineel/Documents/github/demo_data_engineering/pipelines:/opt/airflow/pipelines
+      - /Users/saivineel/Documents/github/demo_data_engineering/common:/opt/airflow/common
+      - /Users/saivineel/Documents/github/demo_data_engineering/secrets:/opt/airflow/secrets
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: version
+
+  flower:
+    image: apache/airflow:2.5.0
+    depends_on:
+      - redis
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=CeleryExecutor
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__RESULT_BACKEND=db+postgresql://airflow:airflow@postgres/airflow
+      - AIRFLOW__CELERY__BROKER_URL=redis://redis:6379/0
+      - PYTHONPATH=/opt/airflow/dags:/opt/airflow/pipelines:/opt/airflow/common:/opt/airflow
+    volumes:
+      - /Users/saivineel/Documents/github/demo_data_engineering/dags:/opt/airflow/dags
+      - /Users/saivineel/Documents/github/demo_data_engineering/pipelines:/opt/airflow/pipelines
+      - /Users/saivineel/Documents/github/demo_data_engineering/common:/opt/airflow/common
+      - /Users/saivineel/Documents/github/demo_data_engineering/secrets:/opt/airflow/secrets
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    ports:
+      - "5555:5555"
+    command: celery flower
+    restart: always
+
+volumes:
+  postgres-db-volume:
